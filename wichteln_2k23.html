@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click the Rectangle Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #000;
+            color: white;
+            cursor: url('crosshair.png'), auto; /* Hier den Pfad zum PNG-Bild angeben */
+            /* Textfarbe für den gesamten Body */
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #timer {
+            position: absolute;
+            top: 10px;
+            font-size: 24px;
+            color: white;
+        }
+
+        /* Start-Button wird standardmäßig sichtbar gemacht */
+        #startButton {
+            display: none;
+            /* Start-Button im HTML ist standardmäßig nicht sichtbar */
+        }
+
+        #startMenu {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1;
+            /* Startmenü über dem Canvas positionieren */
+        }
+
+        #welcomeMessage {
+            color: white;
+            /* Textfarbe für die Willkommensmeldung im Startmenü */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="timer" tabindex="0">25</div>
+    <div id="startMenu">
+        <h2 id="welcomeMessage">Happy Cockwichteln 2k23</h2>
+        <h2 id="welcomeMessage">Zeig uns dein Silver Aim!</h2>
+        <button onclick="startGame()">Start</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const timerDisplay = document.getElementById('timer');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+
+        let isGameActive = false;
+        let counter = 2;
+        let timer;
+        let positionX, positionY, rectSize;
+
+        function startGame() {
+            // Anpassung der Canvas-Größe an die Fenstergröße
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            startMenu.style.display = 'none'; // Verstecke das Startmenü
+            isGameActive = true;
+            spawnRectangle();
+        }
+
+        function spawnRectangle() {
+            if (counter > 0) {
+                if (counter >= 20   ) { rectSize = 60 }
+                else if (counter > 15) { rectSize = 50 }
+                else if (counter > 10) { rectSize = 40 }
+                else if (counter > 5) { rectSize = 30 }
+                else if (counter > 1) { rectSize = 20 }
+                else { rectSize = 10}
+                positionX = Math.random() * (canvas.width - rectSize);
+                positionY = Math.random() * (canvas.height - rectSize);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'blue';
+                ctx.fillRect(positionX, positionY, rectSize, rectSize);
+
+                updateTimerDisplay();
+
+
+                timer = setTimeout(() => {
+                    if (isGameActive) {
+                        resetGame();
+                    }
+                }, 1000);
+            } else {
+                endGame();
+            }
+        }
+
+
+        function resetGame() {
+            isGameActive = false;
+            clearTimeout(timer);
+            counter = 25;
+            showStartMenuLoose(); // Zeige das Startmenü nach dem Zurücksetzen
+            updateTimerDisplay();
+        }
+
+        function endGame() {
+            isGameActive = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Pfad zum Siegerbild anpassen
+            const winnerImage = new Image();
+            winnerImage.src = 'Winner/reingeguckt.png';
+
+            winnerImage.onload = function () {
+                ctx.drawImage(winnerImage, 0, 0, canvas.width, canvas.height);
+            };
+
+
+        }
+
+        function updateTimerDisplay() {
+            timerDisplay.textContent = counter;
+        }
+
+        canvas.addEventListener('click', function (event) {
+            if (isGameActive) {
+                const rect = canvas.getBoundingClientRect();
+                const clickX = event.clientX - rect.left;
+                const clickY = event.clientY - rect.top;
+
+                if (
+                    clickX >= positionX &&
+                    clickX <= positionX + rectSize &&
+                    clickY >= positionY &&
+                    clickY <= positionY + rectSize
+                ) {
+                    counter--;
+                    clearTimeout(timer);
+                    spawnRectangle();
+                }
+            }
+        });
+
+        // Starte das Spiel bei Klick auf das Timer-Element
+        timerDisplay.addEventListener('click', startGame);
+
+        // Funktion, um das Startmenü anzuzeigen
+        function showStartMenu() {
+            welcomeMessage.textContent = 'reingeguckt'; // Aktualisiere die Willkommensmeldung
+            startMenu.style.display = 'block'; // Zeige das Startmenü
+            startButton.style.display = 'none'; // Verstecke den Start-Button
+        }
+        function showStartMenuLoose() {
+            welcomeMessage.textContent = 'Zu langsam - versuche es erneut!'; // Aktualisiere die Willkommensmeldung
+            startMenu.style.display = 'block'; // Zeige das Startmenü
+            startButton.style.display = 'none'; // Verstecke den Start-Button
+        }
+    </script>
+</body>
+
+</html>
